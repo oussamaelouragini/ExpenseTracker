@@ -5,6 +5,7 @@ import { validateSignInForm } from "@/core/utils/validators";
 import { authService } from "@/features/auth/services/authService";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { useUser } from "@/providers/UserProvider";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface FormState {
@@ -21,6 +22,7 @@ interface FormErrors {
 // ── Hook ──────────────────────────────────────────────────────────────────────
 export function useSignIn() {
   const router = useRouter();
+  const { updateUser } = useUser();
 
   const [form, setForm] = useState<FormState>({ email: "", password: "" });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -50,11 +52,12 @@ export function useSignIn() {
     try {
       setLoading(true);
 
-      // 🔴 Hna mock — later tbadlou bel authService réel
-      await authService.signIn({
+      const userData = await authService.signIn({
         email: form.email,
         password: form.password,
       });
+
+      updateUser(userData);
 
       // ✅ Navigation after success
       router.replace("/(tabs)/dashboard");

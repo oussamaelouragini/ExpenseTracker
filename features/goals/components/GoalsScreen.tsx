@@ -9,12 +9,14 @@ import { useRouter } from "expo-router";
 import React from "react";
 import {
   FlatList,
+  Image,
   ScrollView,
   StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useUser } from "@/providers/UserProvider";
 import { useExploreGoals } from "../hooks/useExploreGoals";
 import { EXPLORE_FEATURED_ID } from "../hooks/useGoalsData";
 import type { ActiveGoal, GoalCategory } from "../types/goals.types";
@@ -25,16 +27,23 @@ import { C, styles } from "./GoalsScreen.styles";
 // ─────────────────────────────────────────────────────────────────────────────
 
 function Header() {
+  const { user } = useUser();
+
   return (
     <View style={styles.header}>
       <View style={styles.headerLeft}>
         <View style={styles.avatarImg}>
-          <Ionicons name="person" size={20} color={C.onVariant} />
+          {user.avatarUri ? (
+            <Image source={{ uri: user.avatarUri }} style={styles.headerAvatarImage} />
+          ) : (
+            <Ionicons name="person" size={22} color="#fff" />
+          )}
         </View>
-        <Text style={styles.headerBrand}>Vault</Text>
+        <Text style={styles.headerBrand}>{user.fullName}</Text>
       </View>
       <TouchableOpacity style={styles.bellBtn}>
-        <Ionicons name="notifications" size={22} color={C.primary} />
+        <Ionicons name="notifications-outline" size={20} color="#1E2A4A" />
+        <View style={styles.bellDot} />
       </TouchableOpacity>
     </View>
   );
@@ -229,7 +238,7 @@ export default function GoalsScreen() {
             <>
               <View style={styles.sectionRow}>
                 <Text style={styles.sectionTitle}>Active Progress</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("/(tabs)/all-goals")}>
                   <Text style={styles.seeAllText}>View Details</Text>
                 </TouchableOpacity>
               </View>

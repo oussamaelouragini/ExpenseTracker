@@ -11,6 +11,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { useColorScheme } from "@/core/hooks/use-color-scheme";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { UserProvider } from "@/providers/UserProvider";
 import { useEffect } from "react";
 
 // Keep the splash screen visible until we're done loading
@@ -53,7 +54,9 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <UserProvider>
+        <RootLayoutNav />
+      </UserProvider>
     </AuthProvider>
   );
 }

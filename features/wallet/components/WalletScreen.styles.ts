@@ -26,6 +26,12 @@ export const styles = StyleSheet.create({
     backgroundColor: "#3B5BDB",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+  },
+  headerAvatarImage: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
   },
   headerTitle: {
     fontSize: 20,

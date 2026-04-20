@@ -2,11 +2,13 @@
 // ✅ Logic & State only — all business logic here, zero UI
 
 import { useState } from "react";
+import { useUser } from "@/providers/UserProvider";
 import type { QuickAction, Transaction } from "../types/dashboard.types";
 
 export function useDashboard() {
   const [balance] = useState(48562.0);
   const [loading] = useState(false);
+  const { user } = useUser();
 
   // ── Mock transactions — later tbadlhom bel API ──────────────────────────────
   const [transactions] = useState<Transaction[]>([
@@ -92,6 +94,6 @@ export function useDashboard() {
     quickActions,
     formatAmount,
     formatBalance,
-    user: { fullName: "Alex Rivera" }, // later: get from AuthProvider
+    user,
   };
 }

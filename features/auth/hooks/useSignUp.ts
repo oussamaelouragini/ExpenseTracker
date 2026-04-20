@@ -4,10 +4,12 @@ import { SignUpPayload } from "@/features/auth/types/auth.types";
 import { AuthContext } from "@/providers/AuthProvider";
 import { useRouter } from "expo-router";
 import { useContext, useState } from "react";
+import { useUser } from "@/providers/UserProvider";
 
 export function useSignUp() {
   const router = useRouter();
   const { signIn } = useContext(AuthContext);
+  const { updateUser } = useUser();
   const [form, setForm] = useState<SignUpPayload>({
     fullName: "",
     email: "",
@@ -32,7 +34,8 @@ export function useSignUp() {
     }
     try {
       setLoading(true);
-      await authService.signUp(form);
+      const userData = await authService.signUp(form);
+      updateUser(userData);
       signIn();
     } catch (error) {
       console.error(error);

@@ -1,34 +1,30 @@
-// app/(tabs)/_layout.tsx — FINAL CLEAN VERSION
-// ✅ Blue color #3B5BDB (same as all other screens)
-// ✅ FAB floats above tab bar with clean white notch
-// ✅ No black background — pure white bar
-// ✅ 4 tabs: Home, Wallet | FAB | Goals, Profile
-// ✅ react-native-svg for clean curved notch
+// app/(tabs)/_layout.tsx — FIXED
+// ✅ No black — transparent background everywhere
+// ✅ Only the white bar is visible, notch area is see-through
+// ✅ FAB floats cleanly above
 
 import { Ionicons } from "@expo/vector-icons";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Tabs } from "expo-router";
 import {
-  Dimensions,
+  useWindowDimensions,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 
-const { width: W } = Dimensions.get("window");
-
-// ── Design tokens ──────────────────────────────────────────────────────────
-const BLUE = "#3B5BDB"; // same as dashboard, wallet, stats
+// ── Tokens ────────────────────────────────────────────────────────────────
+const BLUE = "#3B5BDB";
 const INACTIVE = "#94A3B8";
-const BAR_H = 68;
-const FAB_SIZE = 54;
-const FAB_RISE = 22; // how much FAB center sits above bar top
-const NOTCH_R = FAB_SIZE / 2 + 8;
+const BAR_H = 64;
+const FAB_SIZE = 56;
+const FAB_RISE = FAB_SIZE / 2; // FAB center sits exactly on top edge of bar
+const NR = FAB_SIZE / 2 + 10; // notch radius
 
-// ── Tab definitions ────────────────────────────────────────────────────────
+// ── Tab config ────────────────────────────────────────────────────────────
 const LEFT_TABS = [
   { name: "index", label: "Home", icon: "home-outline", iconActive: "home" },
   {
@@ -49,34 +45,27 @@ const RIGHT_TABS = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SVG Notch Background
-// Clean white shape with smooth inward curve at center top
+// SVG white bar with transparent notch
+// KEY: the SVG background is transparent — only the Path is white
 // ─────────────────────────────────────────────────────────────────────────────
-function NotchedBar({ insets }: { insets: { bottom: number } }) {
-  const h = BAR_H + FAB_RISE + insets.bottom;
-  const cx = W / 2;
-  const nr = NOTCH_R;
-  const smooth = 14; // tangent length for smooth bezier
+function WhiteBar({ width }: { width: number }) {
+  const cx = width / 2;
 
-  // Smooth notch using cubic bezier curves
+  // Smooth cubic bezier notch
   const d = [
     `M 0 0`,
-    `L ${cx - nr - smooth} 0`,
-    `C ${cx - nr} 0, ${cx - nr} ${nr}, ${cx} ${nr}`,
-    `C ${cx + nr} ${nr}, ${cx + nr} 0, ${cx + nr + smooth} 0`,
-    `L ${W} 0`,
-    `L ${W} ${h}`,
-    `L 0 ${h}`,
+    `L ${cx - NR - 16} 0`,
+    `C ${cx - NR - 2} 0 ${cx - NR} ${10} ${cx - NR} ${NR}`,
+    `A ${NR} ${NR} 0 0 0 ${cx + NR} ${NR}`,
+    `C ${cx + NR} ${10} ${cx + NR + 2} 0 ${cx + NR + 16} 0`,
+    `L ${width} 0`,
+    `L ${width} ${BAR_H}`,
+    `L 0 ${BAR_H}`,
     `Z`,
   ].join(" ");
 
   return (
-    <Svg
-      width={W}
-      height={h}
-      style={StyleSheet.absoluteFill}
-      // Ensure no background color bleeds through
-    >
+    <Svg width={width} height={BAR_H} style={StyleSheet.absoluteFill}>
       <Path d={d} fill="#FFFFFF" />
     </Svg>
   );
@@ -86,11 +75,12 @@ function NotchedBar({ insets }: { insets: { bottom: number } }) {
 // Custom Tab Bar
 // ─────────────────────────────────────────────────────────────────────────────
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
-  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  
   const renderTab = (tab: (typeof LEFT_TABS)[0]) => {
-    const routeIndex = state.routes.findIndex((r) => r.name === tab.name);
-    const isFocused = state.index === routeIndex;
-    const route = state.routes[routeIndex];
+    const idx = state.routes.findIndex((r) => r.name === tab.name);
+    const isFocused = state.index === idx;
+    const route = state.routes[idx];
     if (!route) return null;
 
     const onPress = () => {
@@ -99,9 +89,7 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
         target: route.key,
         canPreventDefault: true,
       });
-      if (!isFocused && !event.defaultPrevented) {
-        navigation.navigate(tab.name);
-      }
+      if (!isFocused && !event.defaultPrevented) navigation.navigate(tab.name);
     };
 
     return (
@@ -123,36 +111,24 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
     );
   };
 
-  const iosBottom = insets.bottom;
-  const wrapperHeight = BAR_H + FAB_RISE + iosBottom;
-
   return (
-    <View
-      style={[
-        s.outerWrapper,
-        { paddingBottom: iosBottom, height: wrapperHeight },
-      ]}
-    >
-      {/* ── Clean white notched background ── */}
-      <NotchedBar insets={insets} />
+    // ✅ CRITICAL: backgroundColor transparent so screen bg shows through notch
+    <View style={s.wrapper}>
+      {/* White bar with notch hole — only white part visible */}
+      <WhiteBar width={width} />
 
-      {/* ── Top shadow line — subtle separator ── */}
-      <View style={s.shadowLine} />
+      {/* Shadow under bar — soft, no color */}
+      <View style={s.shadowLayer} />
 
-      {/* ── Tab items row ── */}
-      <View style={s.row}>
-        {/* Left: Home + Wallet */}
+      {/* Tab items — sit inside white bar area */}
+      <View style={s.tabRow}>
         <View style={s.side}>{LEFT_TABS.map(renderTab)}</View>
-
-        {/* Center spacer — space for FAB */}
-        <View style={{ width: FAB_SIZE + 32 }} />
-
-        {/* Right: Goals + Profile */}
+        <View style={{ width: FAB_SIZE + 20 }} />
         <View style={s.side}>{RIGHT_TABS.map(renderTab)}</View>
       </View>
 
-      {/* ── FAB — centered, floats above bar ── */}
-      <View style={s.fabContainer} pointerEvents="box-none">
+      {/* FAB — centered at top of wrapper */}
+      <View style={s.fabPos} pointerEvents="box-none">
         <TouchableOpacity
           style={s.fab}
           activeOpacity={0.85}
@@ -161,6 +137,11 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
           <Ionicons name="add" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      {/* iOS bottom safe area — transparent */}
+      {Platform.OS === "ios" && (
+        <View style={{ height: 34, backgroundColor: "#fff" }} />
+      )}
     </View>
   );
 }
@@ -181,6 +162,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
       <Tabs.Screen name="add-expense" options={{ href: null }} />
       <Tabs.Screen name="stats" options={{ href: null }} />
+      <Tabs.Screen name="all-transactions" options={{ href: null }} />
     </Tabs>
   );
 }
@@ -189,28 +171,29 @@ export default function TabsLayout() {
 // Styles
 // ─────────────────────────────────────────────────────────────────────────────
 const s = StyleSheet.create({
-  outerWrapper: {
-    width: W,
+  wrapper: {
+    width: "100%",
     height: BAR_H + FAB_RISE,
-    backgroundColor: "transparent", // ✅ transparent — SVG handles bg
+    backgroundColor: Platform.OS === "web" ? "#ffffff" : "transparent",
   },
 
-  // Subtle top shadow — no black, just a soft blur line
-  shadowLine: {
+  // Shadow lives on a separate layer — only under the white part
+  shadowLayer: {
     position: "absolute",
-    top: FAB_RISE,
+    bottom: 0,
     left: 0,
     right: 0,
-    height: 1,
+    width: "100%",
+    height: BAR_H,
     backgroundColor: "transparent",
-    shadowColor: "#ffffff",
+    shadowColor: "#000",
     shadowOpacity: 0.08,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: -4 },
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: -3 },
     elevation: 8,
   },
 
-  row: {
+  tabRow: {
     position: "absolute",
     bottom: 0,
     left: 0,
@@ -242,27 +225,27 @@ const s = StyleSheet.create({
     letterSpacing: 0.2,
   },
 
-  // FAB container — centered absolutely at top of outerWrapper
-  fabContainer: {
+  // FAB floats at top-center of wrapper
+  fabPos: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     alignItems: "center",
-    height: FAB_SIZE,
   },
 
   fab: {
     width: FAB_SIZE,
     height: FAB_SIZE,
     borderRadius: FAB_SIZE / 2,
-    backgroundColor: BLUE, // ✅ blue — matches all screens
+    backgroundColor: BLUE,
     alignItems: "center",
     justifyContent: "center",
+    // Blue glow shadow
     shadowColor: BLUE,
-    shadowOpacity: 0.4,
+    shadowOpacity: 0.45,
     shadowRadius: 16,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 12,
   },
 });

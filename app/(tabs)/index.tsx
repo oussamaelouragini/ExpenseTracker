@@ -9,6 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
+  Image,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -17,9 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-const USER = { fullName: "Alex Rivera" };
+import { useUser } from "@/providers/UserProvider";
 
 const QUICK_ACTIONS = [
   { id: "send", label: "Send", icon: "arrow-redo-outline" },
@@ -41,36 +40,34 @@ const formatAmount = (n: number) => {
 // Sub-components
 // ─────────────────────────────────────────────────────────────────────────────
 function Header() {
-  const initials = USER.fullName
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
+  const { user } = useUser();
+
   return (
     <View style={s.header}>
       <View style={s.headerLeft}>
-        <View style={s.avatar}>
-          <Text style={s.avatarText}>{initials}</Text>
+        <View style={s.avatarCircle}>
+          {user.avatarUri ? (
+            <Image source={{ uri: user.avatarUri }} style={s.headerAvatarImage} />
+          ) : (
+            <Ionicons name="person" size={22} color="#fff" />
+          )}
         </View>
-        <View>
-          <Text style={s.welcomeText}>WELCOME BACK,</Text>
-          <Text style={s.userName}>{USER.fullName}</Text>
-        </View>
+        <Text style={s.headerTitle}>{user.fullName}</Text>
       </View>
       <TouchableOpacity style={s.bellBtn}>
-        <Ionicons name="notifications-outline" size={22} color="#1E2A4A" />
+        <Ionicons name="notifications-outline" size={20} color="#1E2A4A" />
+        <View style={s.bellDot} />
       </TouchableOpacity>
     </View>
   );
 }
 
 function BalanceCard({ balance }: { balance: number }) {
+  const router = useRouter();
   return (
     <View style={s.balanceCard}>
       <View style={s.cardTopRow}>
         <Text style={s.balanceLabel}>Total Balance</Text>
-        <View style={s.cardIconWrapper}>
-          <Ionicons name="wallet-outline" size={22} color="#fff" />
-        </View>
       </View>
       <Text style={s.balanceAmount}>{formatBalance(balance)}</Text>
       <View style={s.cardDivider} />
@@ -83,7 +80,7 @@ function BalanceCard({ balance }: { balance: number }) {
             <Ionicons name="ellipse" size={10} color="rgba(255,255,255,0.5)" />
           </View>
         </View>
-        <TouchableOpacity style={s.viewDetailsBtn}>
+        <TouchableOpacity style={s.viewDetailsBtn} onPress={() => router.push("/(tabs)/wallet")}>
           <Text style={s.viewDetailsText}>View Details</Text>
         </TouchableOpacity>
       </View>
@@ -142,39 +139,28 @@ function TransactionItem({ tx }: { tx: Transaction }) {
 // Main Screen
 // ─────────────────────────────────────────────────────────────────────────────
 export default function HomeScreen() {
-  // ✅ Real data from store — updates automatically after every new transaction
+  const router = useRouter();
   const balance = useTransactionStore((s) => s.balance);
-  const getRecentTransactions = useTransactionStore(
-    (s) => s.getRecentTransactions,
-  );
-  const recentTransactions = getRecentTransactions(5);
+  const getRecentTransactions = useTransactionStore((s) => s.getRecentTransactions);
+  const recentTransactions = getRecentTransactions(3);
 
   return (
     <SafeAreaView style={s.safe}>
       <StatusBar barStyle="dark-content" backgroundColor="#ECEEF5" />
-      <ScrollView
-        contentContainerStyle={s.scroll}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* 1 — Header */}
+      <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         <Header />
-
-        {/* 2 — Balance Card (real balance from store) */}
         <BalanceCard balance={balance} />
-
-        {/* 3 — Quick Actions */}
         <QuickActionsRow />
 
-        {/* 4 — Recent Transactions (real data from store) */}
+        {/* Recent Transactions */}
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>Recent Transactions</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/(tabs)/all-transactions")}>
             <Text style={s.seeAll}>See All</Text>
           </TouchableOpacity>
         </View>
 
         {recentTransactions.length === 0 ? (
-          // Empty state
           <View style={s.emptyState}>
             <Ionicons name="receipt-outline" size={48} color="#CBD5E1" />
             <Text style={s.emptyText}>No transactions yet</Text>
@@ -183,9 +169,7 @@ export default function HomeScreen() {
             </Text>
           </View>
         ) : (
-          recentTransactions.map((tx) => (
-            <TransactionItem key={tx.id} tx={tx} />
-          ))
+          recentTransactions.map((tx) => <TransactionItem key={tx.id} tx={tx} />)
         )}
       </ScrollView>
     </SafeAreaView>
@@ -195,7 +179,7 @@ export default function HomeScreen() {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const s = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#ECEEF5" },
-  scroll: { padding: 20, paddingBottom: 16 },
+  scroll: { padding: 20, paddingBottom: 100 },
 
   header: {
     flexDirection: "row",
@@ -204,40 +188,40 @@ const s = StyleSheet.create({
     marginBottom: 24,
   },
   headerLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
-  avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: "#F4C99A",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarText: { fontSize: 18, fontWeight: "800", color: "#fff" },
-  welcomeText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#94A3B8",
-    letterSpacing: 1.5,
-    marginBottom: 2,
-  },
-  userName: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: "#0F172A",
-    letterSpacing: -0.3,
-  },
-  bellBtn: {
+  avatarCircle: {
     width: 46,
     height: 46,
     borderRadius: 23,
+    backgroundColor: "#3B5BDB",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  headerAvatarImage: { width: 46, height: 46, borderRadius: 23 },
+  headerTitle: { fontSize: 20, fontWeight: "800", color: "#0F172A", letterSpacing: -0.3 },
+  bellBtn: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
     shadowOpacity: 0.06,
-    shadowRadius: 8,
+    shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
+  },
+  bellDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#EF4444",
+    position: "absolute",
+    top: 8,
+    right: 8,
+    borderWidth: 1.5,
+    borderColor: "#fff",
   },
 
   balanceCard: {
@@ -251,17 +235,8 @@ const s = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     elevation: 12,
   },
-  cardTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  balanceLabel: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.75)",
-    fontWeight: "500",
-  },
+  cardTopRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 },
+  balanceLabel: { fontSize: 14, color: "rgba(255,255,255,0.75)", fontWeight: "500" },
   cardIconWrapper: {
     width: 44,
     height: 44,
@@ -270,23 +245,9 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  balanceAmount: {
-    fontSize: 38,
-    fontWeight: "800",
-    color: "#fff",
-    letterSpacing: -1,
-    marginBottom: 20,
-  },
-  cardDivider: {
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    marginBottom: 20,
-  },
-  cardBottomRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
+  balanceAmount: { fontSize: 38, fontWeight: "800", color: "#fff", letterSpacing: -1, marginBottom: 20 },
+  cardDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.2)", marginBottom: 20 },
+  cardBottomRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   visaGroup: { flexDirection: "row", alignItems: "center" },
   visaCircle1: {
     width: 36,
@@ -310,20 +271,10 @@ const s = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.3)",
   },
   visaText: { fontSize: 9, fontWeight: "800", color: "#fff" },
-  viewDetailsBtn: {
-    backgroundColor: "#fff",
-    borderRadius: 50,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
+  viewDetailsBtn: { backgroundColor: "#fff", borderRadius: 50, paddingHorizontal: 20, paddingVertical: 10 },
   viewDetailsText: { fontSize: 14, fontWeight: "700", color: "#3B5BDB" },
 
-  actionsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 32,
-    paddingHorizontal: 8,
-  },
+  actionsRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 32, paddingHorizontal: 8 },
   actionItem: { alignItems: "center", gap: 10 },
   actionCircle: {
     width: 60,
@@ -340,18 +291,8 @@ const s = StyleSheet.create({
   },
   actionLabel: { fontSize: 13, fontWeight: "500", color: "#475569" },
 
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#0F172A",
-    letterSpacing: -0.4,
-  },
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
+  sectionTitle: { fontSize: 22, fontWeight: "800", color: "#0F172A", letterSpacing: -0.4 },
   seeAll: { fontSize: 15, fontWeight: "600", color: "#3B5BDB" },
 
   txCard: {
@@ -367,32 +308,15 @@ const s = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
-  txIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 14,
-  },
+  txIcon: { width: 50, height: 50, borderRadius: 16, alignItems: "center", justifyContent: "center", marginRight: 14 },
   txInfo: { flex: 1 },
-  txTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0F172A",
-    marginBottom: 4,
-  },
+  txTitle: { fontSize: 16, fontWeight: "700", color: "#0F172A", marginBottom: 4 },
   txMeta: { fontSize: 13, color: "#94A3B8" },
   txRight: { alignItems: "flex-end" },
   txAmount: { fontSize: 16, fontWeight: "700", marginBottom: 4 },
   txPos: { color: "#16A34A" },
   txNeg: { color: "#0F172A" },
-  txStatus: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#94A3B8",
-    letterSpacing: 0.8,
-  },
+  txStatus: { fontSize: 10, fontWeight: "600", color: "#94A3B8", letterSpacing: 0.8 },
 
   emptyState: { alignItems: "center", paddingVertical: 48, gap: 10 },
   emptyText: { fontSize: 17, fontWeight: "700", color: "#94A3B8" },

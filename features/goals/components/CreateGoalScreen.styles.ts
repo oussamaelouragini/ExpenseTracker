@@ -39,13 +39,9 @@ export const createStyles = StyleSheet.create({
     letterSpacing: 1,
     marginTop: 2,
   },
-  helpBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: C.primary,
-    alignItems: "center",
-    justifyContent: "center",
+  headerPlaceholder: {
+    width: 40,
+    height: 40,
   },
 
   // ── Progress bar ─────────────────────────────────────────────────────────────
@@ -103,35 +99,116 @@ export const createStyles = StyleSheet.create({
 
   // ── Field card ───────────────────────────────────────────────────────────────
   fieldCard: {
-    backgroundColor: C.surfaceLow,
+    backgroundColor: "#fff",
     borderRadius: 20,
-    padding: 18,
+    padding: 20,
     marginBottom: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
   fieldLabel: {
     fontSize: 11,
     fontWeight: "700",
-    color: C.onVariant,
+    color: "#94A3B8",
     letterSpacing: 1.5,
-    marginBottom: 10,
+    marginBottom: 12,
   },
 
   // Amount
+  amountWrapper: {
+    backgroundColor: "#fff",
+    borderRadius: 24,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+    marginBottom: 20,
+  },
   amountRow: { flexDirection: "row", alignItems: "baseline", gap: 4 },
-  amountDollar: { fontSize: 28, fontWeight: "700", color: C.onVariant },
+  amountDollar: { fontSize: 36, fontWeight: "700", color: "#3B5BDB" },
   amountValue: {
-    fontSize: 52,
+    fontSize: 64,
     fontWeight: "800",
-    color: C.onSurface,
+    color: "#0F172A",
     letterSpacing: -2,
+  },
+  amountHint: {
+    fontSize: 13,
+    color: "#94A3B8",
+    marginTop: 8,
+  },
+  quickAmountsWrapper: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 10,
+    marginBottom: 16,
+  },
+  quickAmountBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: "#fff",
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+  },
+  quickAmountBtnActive: {
+    backgroundColor: "#EEF2FF",
+    borderColor: "#3B5BDB",
+  },
+  quickAmountText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#64748B",
+  },
+  quickAmountTextActive: {
+    color: "#3B5BDB",
   },
 
   // Goal name input
   goalNameInput: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "700",
-    color: C.onSurface,
+    color: "#0F172A",
     padding: 0,
+  },
+
+  // Summary Card
+  summaryCard: {
+    backgroundColor: "#3B5BDB",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+  },
+  summaryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  summaryItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  summaryDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: "rgba(255,255,255,0.3)",
+  },
+  summaryLabel: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.7)",
+    fontWeight: "600",
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  summaryValue: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#fff",
   },
 
   // Date row
@@ -146,13 +223,15 @@ export const createStyles = StyleSheet.create({
   // Duration pills
   durationRow: { flexDirection: "row", gap: 10 },
   durationPill: {
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 50,
-    backgroundColor: C.surfaceCard,
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    borderRadius: 16,
+    backgroundColor: "#F8FAFC",
+    alignItems: "center",
   },
-  durationPillActive: { backgroundColor: C.primary },
-  durationText: { fontSize: 14, fontWeight: "600", color: C.onVariant },
+  durationPillActive: { backgroundColor: "#3B5BDB" },
+  durationText: { fontSize: 13, fontWeight: "700", color: "#64748B" },
   durationTextActive: { color: "#fff" },
 
   // Frequency option row
@@ -160,71 +239,100 @@ export const createStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 14,
+    paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: C.surfaceLow,
+    borderBottomColor: "#F1F5F9",
   },
   frequencyOptionLast: { borderBottomWidth: 0 },
-  frequencyText: { fontSize: 16, fontWeight: "600", color: C.onSurface },
-
-  // Radio dot
-  radioDot: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2,
-    borderColor: C.onVariant,
+  frequencyLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  freqIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#F8FAFC",
     alignItems: "center",
     justifyContent: "center",
   },
-  radioDotActive: { borderColor: C.primary },
+  frequencyText: { fontSize: 16, fontWeight: "700", color: "#0F172A" },
+  frequencySub: {
+    fontSize: 12,
+    color: "#94A3B8",
+    marginTop: 2,
+  },
+
+  // Radio dot
+  radioDot: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#CBD5E1",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioDotActive: { borderColor: "#3B5BDB" },
   radioInner: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: C.primary,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#3B5BDB",
   },
 
   // ── AI Estimation card ────────────────────────────────────────────────────────
   aiCard: {
-    backgroundColor: "#f3f0ff",
+    backgroundColor: "#EEF2FF",
     borderRadius: 20,
-    padding: 18,
+    padding: 20,
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: "#C7D2FE",
   },
   aiRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 6,
+    marginBottom: 8,
   },
-  aiTitle: { fontSize: 15, fontWeight: "800", color: C.primary },
-  aiBody: { fontSize: 14, color: C.onVariant, lineHeight: 21 },
-  aiLink: { fontWeight: "800", color: C.primary },
+  aiTitle: { fontSize: 13, fontWeight: "800", color: "#3B5BDB", letterSpacing: 0.5 },
+  aiBody: { fontSize: 14, color: "#475569", lineHeight: 22 },
+  aiLink: { fontWeight: "800", color: "#3B5BDB" },
 
   // ── CTA Button ────────────────────────────────────────────────────────────────
-  ctaWrapper: { paddingHorizontal: 22, marginBottom: 12 },
+  ctaWrapper: { paddingHorizontal: 22, marginBottom: 12, marginTop: 8 },
   ctaBtn: {
-    borderRadius: 50,
-    height: 58,
+    height: 60,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: C.primary,
+  },
+  ctaGradient: {
+    flex: 1,
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 16,
+    paddingHorizontal: 24,
+    shadowColor: "#3B5BDB",
     shadowOpacity: 0.4,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 10,
   },
   ctaText: {
-    fontSize: 17,
-    fontWeight: "800",
+    fontSize: 18,
+    fontWeight: "900",
     color: "#fff",
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
   ctaNote: {
     fontSize: 11,
-    color: C.onVariant,
+    color: "#94A3B8",
     textAlign: "center",
     letterSpacing: 1.2,
+    marginTop: 12,
   },
 });

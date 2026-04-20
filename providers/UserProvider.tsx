@@ -1,0 +1,57 @@
+import React, { createContext, useContext, useState, useCallback } from "react";
+
+export interface UserProfile {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  countryCode: string;
+  address: string;
+  memberType: "PREMIUM MEMBER" | "STANDARD MEMBER";
+  avatarUri: string | null;
+}
+
+interface UserContextType {
+  user: UserProfile;
+  updateUser: (updates: Partial<UserProfile>) => void;
+  isLoading: boolean;
+  isHydrated: boolean;
+}
+
+const defaultUser: UserProfile = {
+  id: "",
+  fullName: "",
+  email: "",
+  phone: "",
+  countryCode: "+216",
+  address: "",
+  memberType: "STANDARD MEMBER",
+  avatarUri: null,
+};
+
+export const UserContext = createContext<UserContextType>({
+  user: defaultUser,
+  updateUser: () => {},
+  isLoading: false,
+  isHydrated: true,
+});
+
+export function UserProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<UserProfile>(defaultUser);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(true);
+
+  const updateUser = useCallback((updates: Partial<UserProfile>) => {
+    setUser((prev) => ({ ...prev, ...updates }));
+  }, []);
+
+  return (
+    <UserContext.Provider value={{ user, updateUser, isLoading, isHydrated }}>
+      {children}
+    </UserContext.Provider>
+  );
+}
+
+export function useUser() {
+  return useContext(UserContext);
+}

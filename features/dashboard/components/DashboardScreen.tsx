@@ -4,12 +4,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
+  Image,
   ScrollView,
   StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useUser } from "@/providers/UserProvider";
 import { useDashboard } from "../hooks/useDashboard";
 import type { QuickAction, Transaction } from "../types/dashboard.types";
 import { styles } from "./Dashboardscreen.styles";
@@ -19,29 +21,25 @@ import { styles } from "./Dashboardscreen.styles";
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── 1. Header ─────────────────────────────────────────────────────────────────
-function Header({ userName }: { userName: string }) {
-  const initials = userName
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
+function Header() {
+  const { user } = useUser();
 
   return (
     <View style={styles.header}>
       <View style={styles.headerLeft}>
-        {/* Avatar */}
-        <View style={styles.avatar}>
-          <Text style={styles.avatarPlaceholder}>{initials}</Text>
+        <View style={styles.avatarCircle}>
+          {user.avatarUri ? (
+            <Image source={{ uri: user.avatarUri }} style={styles.headerAvatarImage} />
+          ) : (
+            <Ionicons name="person" size={22} color="#fff" />
+          )}
         </View>
-        {/* Name */}
-        <View>
-          <Text style={styles.welcomeText}>WELCOME BACK,</Text>
-          <Text style={styles.userName}>{userName}</Text>
-        </View>
+        <Text style={styles.headerTitle}>{user.fullName}</Text>
       </View>
 
-      {/* Bell */}
       <TouchableOpacity style={styles.bellBtn} activeOpacity={0.8}>
-        <Ionicons name="notifications-outline" size={22} color="#1E2A4A" />
+        <Ionicons name="notifications-outline" size={20} color="#1E2A4A" />
+        <View style={styles.bellDot} />
       </TouchableOpacity>
     </View>
   );
@@ -60,9 +58,7 @@ function BalanceCard({
       {/* Top row — label + wallet icon */}
       <View style={styles.cardTopRow}>
         <Text style={styles.balanceLabel}>Total Balance</Text>
-        <View style={styles.cardIconWrapper}>
-          <Ionicons name="wallet-outline" size={22} color="#fff" />
-        </View>
+      
       </View>
 
       {/* Amount */}
@@ -174,7 +170,6 @@ export default function DashboardScreen() {
     quickActions,
     formatAmount,
     formatBalance,
-    user,
   } = useDashboard();
 
   return (
@@ -188,7 +183,7 @@ export default function DashboardScreen() {
       >
         <View style={styles.container}>
           {/* 1 — Header */}
-          <Header userName={user.fullName} />
+          <Header />
 
           {/* 2 — Balance Card */}
           <BalanceCard balance={balance} formatBalance={formatBalance} />

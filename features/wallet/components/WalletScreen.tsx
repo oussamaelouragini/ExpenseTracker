@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
   Dimensions,
+  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
@@ -13,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useUser } from "@/providers/UserProvider";
 import { useWallet } from "../hooks/useWallet";
 import type { Account, Card, WalletActivity } from "../types/wallet.types";
 import { CARD_WIDTH, styles } from "./WalletScreen.styles";
@@ -25,13 +27,19 @@ const SCREEN_W = Dimensions.get("window").width;
 
 // ── 1. Header ─────────────────────────────────────────────────────────────────
 function Header() {
+  const { user } = useUser();
+
   return (
     <View style={styles.header}>
       <View style={styles.headerLeft}>
         <View style={styles.avatarCircle}>
-          <Ionicons name="person" size={22} color="#fff" />
+          {user.avatarUri ? (
+            <Image source={{ uri: user.avatarUri }} style={styles.headerAvatarImage} />
+          ) : (
+            <Ionicons name="person" size={22} color="#fff" />
+          )}
         </View>
-        <Text style={styles.headerTitle}>The Vault</Text>
+        <Text style={styles.headerTitle}>{user.fullName}</Text>
       </View>
 
       {/* Bell with red dot */}
