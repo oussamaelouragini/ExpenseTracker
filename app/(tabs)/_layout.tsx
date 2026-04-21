@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useColorScheme } from "@/core/hooks/use-color-scheme";
 import Svg, { Path } from "react-native-svg";
 
 // ── Tokens ────────────────────────────────────────────────────────────────
@@ -45,10 +46,10 @@ const RIGHT_TABS = [
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SVG white bar with transparent notch
-// KEY: the SVG background is transparent — only the Path is white
+// SVG bar with transparent notch
+// KEY: the SVG background is transparent — only the Path uses theme color
 // ─────────────────────────────────────────────────────────────────────────────
-function WhiteBar({ width }: { width: number }) {
+function WhiteBar({ width, backgroundColor }: { width: number; backgroundColor: string }) {
   const cx = width / 2;
 
   // Smooth cubic bezier notch
@@ -66,7 +67,7 @@ function WhiteBar({ width }: { width: number }) {
 
   return (
     <Svg width={width} height={BAR_H} style={StyleSheet.absoluteFill}>
-      <Path d={d} fill="#FFFFFF" />
+      <Path d={d} fill={backgroundColor} />
     </Svg>
   );
 }
@@ -76,6 +77,10 @@ function WhiteBar({ width }: { width: number }) {
 // ─────────────────────────────────────────────────────────────────────────────
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const { width } = useWindowDimensions();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const barBackground = isDark ? "#1C1C1E" : "#FFFFFF";
+  const safeAreaBackground = isDark ? "#000000" : "#FFFFFF";
   
   const renderTab = (tab: (typeof LEFT_TABS)[0]) => {
     const idx = state.routes.findIndex((r) => r.name === tab.name);
@@ -99,14 +104,14 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
         onPress={onPress}
         activeOpacity={0.7}
       >
+        <Text style={[s.label, { color: isFocused ? BLUE : INACTIVE }]}>
+          {tab.label}
+        </Text>
         <Ionicons
           name={(isFocused ? tab.iconActive : tab.icon) as any}
           size={24}
           color={isFocused ? BLUE : INACTIVE}
         />
-        <Text style={[s.label, { color: isFocused ? BLUE : INACTIVE }]}>
-          {tab.label}
-        </Text>
       </TouchableOpacity>
     );
   };
@@ -114,8 +119,8 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   return (
     // ✅ CRITICAL: backgroundColor transparent so screen bg shows through notch
     <View style={s.wrapper}>
-      {/* White bar with notch hole — only white part visible */}
-      <WhiteBar width={width} />
+      {/* Bar with notch hole — uses theme color */}
+      <WhiteBar width={width} backgroundColor={barBackground} />
 
       {/* Shadow under bar — soft, no color */}
       <View style={s.shadowLayer} />
@@ -138,9 +143,9 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
         </TouchableOpacity>
       </View>
 
-      {/* iOS bottom safe area — transparent */}
+      {/* iOS bottom safe area — uses theme color */}
       {Platform.OS === "ios" && (
-        <View style={{ height: 34, backgroundColor: "#fff" }} />
+        <View style={{ height: 34, backgroundColor: "#FFFFFF" }} />
       )}
     </View>
   );
@@ -174,7 +179,7 @@ const s = StyleSheet.create({
   wrapper: {
     width: "100%",
     height: BAR_H + FAB_RISE,
-    backgroundColor: Platform.OS === "web" ? "#ffffff" : "transparent",
+    backgroundColor: "#FFFFFF",
   },
 
   // Shadow lives on a separate layer — only under the white part
@@ -186,8 +191,8 @@ const s = StyleSheet.create({
     width: "100%",
     height: BAR_H,
     backgroundColor: "transparent",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
+    shadowColor: "#FFFFFF",
+    shadowOpacity: 0.15,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: -3 },
     elevation: 8,
@@ -214,8 +219,8 @@ const s = StyleSheet.create({
   tabItem: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 10,
+    justifyContent: "flex-end",
+    paddingBottom: 12,
     gap: 3,
   },
 

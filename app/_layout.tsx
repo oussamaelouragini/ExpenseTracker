@@ -34,7 +34,7 @@ function RootLayoutNav() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack screenOptions={{ headerShown: false }}>
           {/* Auth screens */}
