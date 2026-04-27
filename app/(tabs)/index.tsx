@@ -21,10 +21,8 @@ import {
 import { useUser } from "@/providers/UserProvider";
 
 const QUICK_ACTIONS = [
-  { id: "send", label: "Send", icon: "arrow-redo-outline" },
-  { id: "receive", label: "Receive", icon: "arrow-undo-outline" },
   { id: "cards", label: "Cards", icon: "card-outline" },
-  { id: "more", label: "More", icon: "grid-outline" },
+  { id: "analysis", label: "Analysis", icon: "trending-up-outline" },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -99,7 +97,7 @@ function QuickActionsRow() {
           activeOpacity={0.8}
           onPress={() => {
             if (action.id === "cards") router.push("/(tabs)/wallet");
-            if (action.id === "more") router.push("/(tabs)/stats");
+            if (action.id === "analysis") router.push("/(tabs)/stats");
           }}
         >
           <View style={s.actionCircle}>

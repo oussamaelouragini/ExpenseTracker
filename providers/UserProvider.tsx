@@ -13,7 +13,8 @@ export interface UserProfile {
 
 interface UserContextType {
   user: UserProfile;
-  updateUser: (updates: Partial<UserProfile>) => void;
+  updateUser: (updates: Partial<UserProfile> | null) => void;
+  clearUser: () => void;
   isLoading: boolean;
   isHydrated: boolean;
 }
@@ -41,12 +42,20 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isHydrated, setIsHydrated] = useState(true);
 
-  const updateUser = useCallback((updates: Partial<UserProfile>) => {
-    setUser((prev) => ({ ...prev, ...updates }));
+  const updateUser = useCallback((updates: Partial<UserProfile> | null) => {
+    if (updates === null) {
+      setUser(defaultUser);
+    } else {
+      setUser((prev) => ({ ...prev, ...updates }));
+    }
+  }, []);
+
+  const clearUser = useCallback(() => {
+    setUser(defaultUser);
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, updateUser, isLoading, isHydrated }}>
+    <UserContext.Provider value={{ user, updateUser, clearUser, isLoading, isHydrated }}>
       {children}
     </UserContext.Provider>
   );

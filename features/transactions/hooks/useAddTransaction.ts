@@ -4,6 +4,7 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTransactionStore } from "../store/transactionStore";
+import { useCategoriesStore } from "../store/categoriesStore";
 import type {
   Category,
   CategoryId,
@@ -82,10 +83,14 @@ export const QUICK_ADD_ITEMS: QuickAddItem[] = [
 export function useAddTransaction() {
   const router = useRouter();
   const addTransaction = useTransactionStore((s) => s.addTransaction);
+  const userCategories = useCategoriesStore((s) => s.categories);
 
   const [type, setType] = useState<TransactionType>("Expense");
   const [amountStr, setAmountStr] = useState("0");
   const [selectedCat, setSelectedCat] = useState<CategoryId>("shopping");
+
+  // ── Get all categories (default + user-created) ───────────────────────────
+  const allCategories = [...CATEGORIES, ...userCategories];
 
   // ── Numpad handler ─────────────────────────────────────────────────────────
   const handleKey = (key: string) => {
@@ -115,7 +120,7 @@ export function useAddTransaction() {
     const numericAmount = parseFloat(amountStr);
     if (!numericAmount || numericAmount <= 0) return;
 
-    const category = CATEGORIES.find((c) => c.id === selectedCat)!;
+    const category = allCategories.find((c) => c.id === selectedCat) || CATEGORIES[0];
     const finalAmount = type === "Expense" ? -numericAmount : numericAmount;
 
     addTransaction({
@@ -143,6 +148,8 @@ export function useAddTransaction() {
     displayAmount,
     selectedCat,
     setSelectedCat,
+    userCategories,
+    allCategories,
     handleKey,
     handleQuickAdd,
     handleSubmit,

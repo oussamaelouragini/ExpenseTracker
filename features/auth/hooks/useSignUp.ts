@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { validateSignUpForm } from "@/core/utils/validators";
 import { authService } from "@/features/auth/services/authService";
 import { SignUpPayload } from "@/features/auth/types/auth.types";
@@ -36,9 +37,15 @@ export function useSignUp() {
       setLoading(true);
       const userData = await authService.signUp(form);
       updateUser(userData);
+      await AsyncStorage.setItem("userEmail", form.email);
       signIn();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      if (error.response?.data?.message) {
+        setErrors({ email: error.response.data.message });
+      } else {
+        setErrors({ email: "Registration failed. Please try again." });
+      }
     } finally {
       setLoading(false);
     }

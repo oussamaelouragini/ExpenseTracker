@@ -168,7 +168,7 @@ export const styles = StyleSheet.create({
   // ── Quick Actions ─────────────────────────────────────────────────────────────
   actionsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     marginBottom: 32,
     paddingHorizontal: 8,
   },

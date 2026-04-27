@@ -141,6 +141,11 @@ export const styles = StyleSheet.create({
   categoryBoxActive: { borderColor: "#3B5BDB", backgroundColor: "#EEF2FF" },
   categoryLabel: { fontSize: 12, fontWeight: "600", color: "#64748B" },
   categoryLabelActive: { color: "#3B5BDB", fontWeight: "700" },
+  createCategoryBox: {
+    borderStyle: "dashed",
+    borderColor: "#3B5BDB",
+    backgroundColor: "#EEF2FF",
+  },
 
   // ── Quick Add ─────────────────────────────────────────────────────────────────
   quickAddRow: {

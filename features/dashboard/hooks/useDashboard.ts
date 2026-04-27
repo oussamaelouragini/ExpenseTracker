@@ -50,24 +50,14 @@ export function useDashboard() {
   // ── Quick Actions ────────────────────────────────────────────────────────────
   const quickActions: QuickAction[] = [
     {
-      id: "send",
-      label: "Send",
-      icon: "arrow-redo-outline",
-    },
-    {
-      id: "receive",
-      label: "Receive",
-      icon: "arrow-undo-outline",
-    },
-    {
       id: "cards",
       label: "Cards",
       icon: "card-outline",
     },
     {
-      id: "more",
-      label: "More",
-      icon: "grid-outline",
+      id: "analysis",
+      label: "Analysis",
+      icon: "trending-up-outline",
     },
   ];
 

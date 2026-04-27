@@ -17,6 +17,7 @@ import {
   QUICK_ADD_ITEMS,
   useAddTransaction,
 } from "../hooks/useAddTransaction";
+import { useCategoriesStore } from "../store/categoriesStore";
 import type {
   CategoryId,
   QuickAddItem,
@@ -118,16 +119,20 @@ function CategorySelector({
   selected: CategoryId;
   onSelect: (id: CategoryId) => void;
 }) {
+  const router = useRouter();
+  const userCategories = useCategoriesStore((s) => s.categories);
+  const displayCategories = [...CATEGORIES.slice(0, 4), ...userCategories.slice(0, 1)];
+
   return (
     <>
       <View style={styles.sectionRow}>
         <Text style={styles.sectionLabel}>SELECT CATEGORY</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/select-category")}>
           <Text style={styles.seeAllText}>See All</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.categoriesRow}>
-        {CATEGORIES.slice(0, 4).map((cat) => {
+        {displayCategories.map((cat) => {
           const isActive = selected === cat.id;
           return (
             <TouchableOpacity
@@ -159,6 +164,16 @@ function CategorySelector({
             </TouchableOpacity>
           );
         })}
+        <TouchableOpacity
+          style={styles.categoryItem}
+          onPress={() => router.push("/select-category")}
+          activeOpacity={0.8}
+        >
+          <View style={[styles.categoryBox, styles.createCategoryBox]}>
+            <Ionicons name="add" size={24} color="#3B5BDB" />
+          </View>
+          <Text style={styles.categoryLabel}>Create</Text>
+        </TouchableOpacity>
       </View>
     </>
   );

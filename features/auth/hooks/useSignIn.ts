@@ -1,13 +1,11 @@
-// features/auth/hooks/useSignIn.ts
-// ✅ Logic & State only — all business logic here
-
 import { validateSignInForm } from "@/core/utils/validators";
 import { authService } from "@/features/auth/services/authService";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useUser } from "@/providers/UserProvider";
+import { AuthContext } from "@/providers/AuthProvider";
+import { useContext } from "react";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 interface FormState {
   email: string;
   password: string;
@@ -19,38 +17,35 @@ interface FormErrors {
   general?: string;
 }
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
 export function useSignIn() {
   const router = useRouter();
   const { updateUser } = useUser();
+  const { signIn: setAuthSignedIn } = useContext(AuthContext);
 
   const [form, setForm] = useState<FormState>({ email: "", password: "" });
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // ── Validation ──────────────────────────────────────────────────────────────
   const validate = (): boolean => {
     const newErrors = validateSignInForm(form);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // ── Handle field change ──────────────────────────────────────────────────────
   const handleChange = (field: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
-  // ── Submit ──────────────────────────────────────────────────────────────────
   const handleSignIn = async () => {
     if (!validate()) return;
 
     try {
       setLoading(true);
+      setErrors({});
 
       const userData = await authService.signIn({
         email: form.email,
@@ -58,15 +53,16 @@ export function useSignIn() {
       });
 
       updateUser(userData);
-
-      // ✅ Navigation after success
+      setAuthSignedIn();
       router.replace("/(tabs)/dashboard");
     } catch (error: any) {
-      // Handle API errors
-      setErrors({
-        general:
-          error?.message || "Invalid email or password. Please try again.",
-      });
+      if (error.response?.data?.message) {
+        setErrors({ general: error.response.data.message });
+      } else if (error.message) {
+        setErrors({ general: error.message });
+      } else {
+        setErrors({ general: "Unable to connect to server. Please try again." });
+      }
     } finally {
       setLoading(false);
     }

@@ -2,10 +2,11 @@
 // ✅ Uses shared UserContext — changes persist across screens
 // ✅ Ready for backend integration (updateUser can call API)
 
-import React from "react";
-import { useRouter } from "expo-router";
+import React, { useContext } from "react";
 import { Alert } from "react-native";
+import { useRouter } from "expo-router";
 import { useUser } from "@/providers/UserProvider";
+import { AuthContext } from "@/providers/AuthProvider";
 import type {
   AppPreference,
   NotificationSetting,
@@ -15,6 +16,7 @@ import type {
 export function useProfile() {
   const router = useRouter();
   const { user, updateUser } = useUser();
+  const { signOut } = useContext(AuthContext);
 
   // ── Personal Info Rows ────────────────────────────────────────────────────
   const personalInfo: PersonalInfoItem[] = [
@@ -111,14 +113,7 @@ export function useProfile() {
   };
 
   const handleLogOut = () => {
-    Alert.alert("Log Out", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Log Out",
-        style: "destructive",
-        onPress: () => router.replace("/auth/sign-in"),
-      },
-    ]);
+    signOut();
   };
 
   const handleSettings = () => {

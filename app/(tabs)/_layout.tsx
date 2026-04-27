@@ -168,6 +168,8 @@ export default function TabsLayout() {
       <Tabs.Screen name="add-expense" options={{ href: null }} />
       <Tabs.Screen name="stats" options={{ href: null }} />
       <Tabs.Screen name="all-transactions" options={{ href: null }} />
+      <Tabs.Screen name="select-category" options={{ href: null }} />
+      <Tabs.Screen name="create-category" options={{ href: null }} />
     </Tabs>
   );
 }
